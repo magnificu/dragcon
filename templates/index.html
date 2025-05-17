@@ -53,6 +53,7 @@
         <div class="window-footer">
             <button class="btn btn-success btn-sm" onclick="createRecord()">New</button>
             <button class="btn btn-warning btn-sm" onclick="editRecord()">Edit</button>
+            <button class="btn btn-info btn-sm" onclick="propertyRecord()">Properties</button>
             <button class="btn btn-danger btn-sm" onclick="deleteRecord()">Delete</button>
         </div>
     </div>
@@ -73,6 +74,10 @@
                 <input type="file" id="edit-image" class="form-control" accept=".png">
             </div>
             <div id="image-preview"></div>
+            <div class="mb-2">
+                <label>Properties (JSON):</label>
+                <textarea id="edit-property" class="form-control" rows="5" placeholder='{"key": "value"}'></textarea>
+            </div>
         </div>
         <div class="window-footer">
             <button class="btn btn-primary btn-sm" onclick="saveEdit()">Save</button>
@@ -80,7 +85,21 @@
         </div>
     </div>
 
-    <!-- Modal for deleting Items -->
+    <!-- Modal for Viewing Item Properties -->
+    <div id="property-modal" class="draggable modal-window" style="display: none;">
+        <div class="window-header">
+            <span id="property-modal-title">Item Properties</span> <!-- This will be dynamically set to item name -->
+            <button class="btn-close" onclick="closeModal('property-modal')"></button>
+        </div>
+        <div class="modal-body p-3" id="property-body">
+            <!-- Only properties will be dynamically inserted here (not the name) -->
+        </div>
+        <div class="window-footer">
+            <button class="btn btn-secondary btn-sm" onclick="closeModal('property-modal')">Close</button>
+        </div>
+    </div>
+
+    <!-- Modal for Deleting Items -->
     <div id="delete-modal" class="draggable modal-window" style="display: none;">
         <div class="window-header">
             <span>Delete Record</span>

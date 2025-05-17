@@ -92,20 +92,76 @@ function editRecord() {
     $("#edit-name").val(currentName);
     $("#edit-image").val("");
     $("#image-preview").html(`<img src="${currentImage}" alt="Current Image" width="100">`);
-    openModal("edit-modal");
+
+    // Load property JSON
+    $.get(`/item/${selectedRecordId}/property`, function (response) {
+        if (response.success) {
+            $("#edit-property").val(response.item.property); // raw JSON string
+        } else {
+            $("#edit-property").val("");
+        }
+        openModal("edit-modal");
+    });
+}
+
+function propertyRecord() {
+    if (!selectedRecordId) {
+        alert("Please select a record first.");
+        return;
+    }
+
+    $.get(`/item/${selectedRecordId}/property`, function(response) {
+        if (response.success) {
+            const { name, property } = response.item; // Destructure name and properties from response
+            const properties = JSON.parse(property); // Parse properties if it's stored as a JSON string
+
+            // Set the modal title with item name (header)
+            let modalTitle = `${name} Properties`;  // Format title as "itemName Properties"
+            $("#property-modal-title").text(modalTitle);
+
+            // Build properties HTML to display in the modal body
+            let html = ''; // Start with empty HTML
+
+            // Display properties in the modal body (without repeating the name)
+            for (const key in properties) {
+                html += `<p><strong>${key}:</strong> ${properties[key]}</p>`;  // For each property
+            }
+
+            // Add the properties content to the modal body
+            $("#property-body").html(html);
+
+            // Open the modal
+            openModal("property-modal");
+        } else {
+            alert("No properties found for this item.");
+        }
+    });
 }
 
 function saveEdit() {
     const name = $("#edit-name").val().trim();
     const imageFile = $("#edit-image")[0].files[0];
+    const property = $("#edit-property").val().trim();
 
     if (!name) {
         alert("Please enter a name.");
         return;
     }
 
+    // JSON validation !!!
+    if (property) {
+        try {
+            JSON.parse(property);
+        } catch (err) {
+            alert("Invalid JSON in Properties field.");
+            return;
+        }
+    }
+
     const formData = new FormData();
     formData.append("name", name);
+    formData.append("property", property);
+
     if (imageFile) {
         formData.append("image", imageFile);
     }
@@ -157,7 +213,7 @@ $(document).on('click', function (e) {
         $box.addClass('selected');
         selectedRecordId = $box.data('id');
     } else if (
-        !$target.closest('.window-footer').length &&
+        //!$target.closest('.window-footer').length &&
         !$target.closest('.modal-window').length &&
         !$target.hasClass('btn') &&
         !$target.hasClass('btn-close')

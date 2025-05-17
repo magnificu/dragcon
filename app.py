@@ -1,5 +1,6 @@
 import os
 from flask import Flask, render_template, request, jsonify
+import json
 import sqlite3
 from werkzeug.utils import secure_filename
 
@@ -33,21 +34,29 @@ def index():
 @app.route('/create', methods=['POST'])
 def create_item():
     name = request.form['name']
-    image_file = request.files.get('image')  # Get image file from the request
+    properties = request.form.get('property', '{}')  # default to empty JSON
+
+    # ✅ Validate JSON
+    try:
+        json.loads(properties)
+    except json.JSONDecodeError:
+        return jsonify(success=False, error="Invalid JSON in properties"), 400
+
+    image_file = request.files.get('image')
 
     if image_file and allowed_file(image_file.filename):
-        # Secure the filename and save the file
         filename = secure_filename(image_file.filename)
         image_path = os.path.join(app.config['UPLOADED_IMAGES_DEST'], filename)
         image_file.save(image_path)
-        image_url = f"/static/images/{filename}"  # URL to be stored in the DB
+        image_url = f"/static/images/{filename}"
     else:
-        # Use the default image if no file is uploaded
         image_url = app.config['DEFAULT_IMAGE']
 
-    # Store the record in the database
     conn = get_db_connection()
-    conn.execute('INSERT INTO tb_item (name, image_url) VALUES (?, ?)', (name, image_url))
+    conn.execute(
+        'INSERT INTO tb_item (name, image_url, property) VALUES (?, ?, ?)',
+        (name, image_url, properties)
+    )
     conn.commit()
     conn.close()
 
@@ -57,26 +66,41 @@ def create_item():
 def edit_item():
     record_id = request.form['id']
     name = request.form['name']
-    image_file = request.files.get('image')  # Get image file from the request
+    properties = request.form.get('property', '{}')  # Get JSON string from form
+    image_file = request.files.get('image')
 
     conn = get_db_connection()
 
     if image_file and allowed_file(image_file.filename):
-        # If an image is uploaded, save it and update the record
         filename = secure_filename(image_file.filename)
         image_path = os.path.join(app.config['UPLOADED_IMAGES_DEST'], filename)
         image_file.save(image_path)
         image_url = f"/static/images/{filename}"
-        conn.execute('UPDATE tb_item SET name = ?, image_url = ? WHERE id = ?', (name, image_url, record_id))
     else:
-        # If no image is uploaded, use the default image
-        image_url = app.config['DEFAULT_IMAGE']
-        conn.execute('UPDATE tb_item SET name = ?, image_url = ? WHERE id = ?', (name, image_url, record_id))
+        # Keep existing image if not uploading new one
+        existing = conn.execute('SELECT image_url FROM tb_item WHERE id = ?', (record_id,)).fetchone()
+        image_url = existing['image_url'] if existing else app.config['DEFAULT_IMAGE']
 
+    conn.execute(
+        'UPDATE tb_item SET name = ?, image_url = ?, property = ? WHERE id = ?',
+        (name, image_url, properties, record_id)
+    )
     conn.commit()
     conn.close()
 
     return jsonify(success=True)
+
+@app.route('/item/<int:item_id>/property')
+def get_item_property(item_id):
+    conn = get_db_connection()
+    item = conn.execute('SELECT name, property FROM tb_item WHERE id = ?', (item_id,)).fetchone()
+    conn.close()
+    if item and item['property']:
+        return jsonify(success=True, item={
+            'name': item['name'],
+            'property': item['property']
+        })
+    return jsonify(success=False, error="No property found.")
 
 @app.route('/delete', methods=['POST'])
 def delete_item():
