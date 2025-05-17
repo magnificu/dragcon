@@ -1,11 +1,13 @@
-// Drag functionality
+// === main.js content ===
+
+// Drag functionality for modals
 let drag = false;
 let offsetX, offsetY;
 let dragTarget = null;
 let selectedRecordId = null;
 let editingExisting = false;
 
-// Draggable functionality for modals
+// Draggable modals
 $(document).on("mousedown", ".window-header", function (e) {
     drag = true;
     dragTarget = $(this).closest(".draggable");
@@ -29,16 +31,7 @@ $(document).on("mousemove", function (e) {
     }
 });
 
-// Modal Open/Close Helpers
-/*
-function openModal(id) {
-    $("#" + id).show();
-}
-
-function closeModal(id) {
-    $("#" + id).hide();
-}
-*/
+// Modal open/close
 function openModal(modalId) {
     document.getElementById(modalId).style.display = 'block';
 }
@@ -47,8 +40,7 @@ function closeModal(modalId) {
     document.getElementById(modalId).style.display = 'none';
 }
 
-
-// Preview image before saving
+// Preview image
 $("#edit-image").on("change", function (e) {
     const file = e.target.files[0];
     if (file) {
@@ -65,7 +57,6 @@ $("#edit-image").on("change", function (e) {
 // CRUD operations
 function reloadRecords() {
     const lastSelectedId = selectedRecordId;
-
     $("#records-container").load("/tb_item", function () {
         if (lastSelectedId) {
             const selected = $(`.record-box[data-id='${lastSelectedId}']`);
@@ -115,43 +106,29 @@ function saveEdit() {
 
     const formData = new FormData();
     formData.append("name", name);
-
     if (imageFile) {
         formData.append("image", imageFile);
     }
 
+    const url = editingExisting ? "/edit" : "/create";
     if (editingExisting) {
         formData.append("id", selectedRecordId);
-        $.ajax({
-            url: "/edit",
-            type: "POST",
-            data: formData,
-            contentType: false,
-            processData: false,
-            success: function () {
-                reloadRecords();
-                closeModal("edit-modal");
-            },
-            error: function () {
-                alert("Error updating record.");
-            }
-        });
-    } else {
-        $.ajax({
-            url: "/create",
-            type: "POST",
-            data: formData,
-            contentType: false,
-            processData: false,
-            success: function () {
-                reloadRecords();
-                closeModal("edit-modal");
-            },
-            error: function () {
-                alert("Error creating record.");
-            }
-        });
     }
+
+    $.ajax({
+        url: url,
+        type: "POST",
+        data: formData,
+        contentType: false,
+        processData: false,
+        success: function () {
+            reloadRecords();
+            closeModal("edit-modal");
+        },
+        error: function () {
+            alert("Error saving record.");
+        }
+    });
 }
 
 function deleteRecord() {
@@ -170,19 +147,16 @@ function confirmDelete() {
     });
 }
 
-// Handle selection and unselection of record boxes
+// Handle selection and unselection
 $(document).on('click', function (e) {
     const $target = $(e.target);
 
-    // If clicked inside a record-box
     if ($target.closest('.record-box').length) {
         $('.record-box').removeClass('selected');
         const $box = $target.closest('.record-box');
         $box.addClass('selected');
         selectedRecordId = $box.data('id');
-    } 
-    // If clicked outside record-box AND not on control buttons
-    else if (
+    } else if (
         !$target.closest('.window-footer').length &&
         !$target.closest('.modal-window').length &&
         !$target.hasClass('btn') &&
@@ -193,7 +167,7 @@ $(document).on('click', function (e) {
     }
 });
 
-// avoid windows overlapp (when created)
+// Initial positioning
 $(document).ready(function () {
     $(".draggable").each(function (index) {
         const initialLeft = 100 + index * 40;
@@ -201,3 +175,78 @@ $(document).ready(function () {
         $(this).css({ left: initialLeft + "px", top: initialTop + "px" });
     });
 });
+
+
+// === dragdrop.js content merged ===
+
+// Allow elements to be dropped
+function allowDrop(event) {
+    event.preventDefault();
+}
+
+// Start dragging
+function dragStart(event, type) {
+    event.dataTransfer.setData("type", type);
+    event.dataTransfer.setData("id", event.target.dataset.id);
+}
+
+// Handle drop event
+function handleDrop(event, targetType) {
+    event.preventDefault();
+    const draggedId = event.dataTransfer.getData("id");
+    const draggedType = event.dataTransfer.getData("type");
+    const targetId = event.target.dataset.target;
+
+    if (isValidDrop(targetType, draggedType)) {
+        const draggedElement = document.querySelector(`[data-id="${draggedId}"]`);
+        event.target.appendChild(draggedElement);
+        updateDatabase(targetType, draggedType, targetId, draggedId);
+        resizeParentWindow(draggedElement);
+    }
+}
+
+// Validate drop
+function isValidDrop(dropType, dragType) {
+    const validDrops = {
+        'project': ['wp'],
+        'wp': ['subwp'],
+        'subwp': ['item']
+    };
+    return validDrops[dropType]?.includes(dragType);
+}
+
+// Update DB
+function updateDatabase(targetType, draggedType, targetId, draggedId) {
+    fetch('/move', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            source_type: draggedType,
+            source_id: draggedId,
+            target_type: targetType,
+            target_id: targetId
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            console.log('Database updated');
+        } else {
+            console.error('Database update failed');
+        }
+    })
+    .catch(error => console.error('Error:', error));
+}
+
+// Resize parent container
+function resizeParentWindow(draggedElement) {
+    const parent = draggedElement.closest('.draggable');
+    if (parent) {
+        const dropZone = parent.querySelector('.drop-zone');
+        if (dropZone) {
+            parent.style.height = `${dropZone.scrollHeight + 50}px`;
+        }
+    }
+}
