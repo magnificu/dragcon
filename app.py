@@ -22,9 +22,13 @@ def allowed_file(filename):
 @app.route('/')
 def index():
     conn = get_db_connection()
-    records = conn.execute('SELECT * FROM records').fetchall()
+    # Fetch Projects, WPs, subWPs, and Items
+    projects = conn.execute('SELECT * FROM tb_Project').fetchall()
+    wps = conn.execute('SELECT * FROM tb_WP').fetchall()
+    subwps = conn.execute('SELECT * FROM tb_subWP').fetchall()
+    items = conn.execute('SELECT * FROM tb_item').fetchall()
     conn.close()
-    return render_template('index.html', records=records)
+    return render_template('index.html', projects=projects, wps=wps, subwps=subwps, items=items)
 
 @app.route('/create', methods=['POST'])
 def create():
@@ -43,7 +47,7 @@ def create():
 
     # Store the record in the database
     conn = get_db_connection()
-    conn.execute('INSERT INTO records (name, image_url) VALUES (?, ?)', (name, image_url))
+    conn.execute('INSERT INTO tb_item (name, image_url) VALUES (?, ?)', (name, image_url))
     conn.commit()
     conn.close()
 
@@ -63,11 +67,11 @@ def edit():
         image_path = os.path.join(app.config['UPLOADED_IMAGES_DEST'], filename)
         image_file.save(image_path)
         image_url = f"/static/images/{filename}"
-        conn.execute('UPDATE records SET name = ?, image_url = ? WHERE id = ?', (name, image_url, record_id))
+        conn.execute('UPDATE tb_item SET name = ?, image_url = ? WHERE id = ?', (name, image_url, record_id))
     else:
         # If no image is uploaded, use the default image
         image_url = app.config['DEFAULT_IMAGE']
-        conn.execute('UPDATE records SET name = ?, image_url = ? WHERE id = ?', (name, image_url, record_id))
+        conn.execute('UPDATE tb_item SET name = ?, image_url = ? WHERE id = ?', (name, image_url, record_id))
 
     conn.commit()
     conn.close()
@@ -78,17 +82,40 @@ def edit():
 def delete():
     record_id = request.form['id']
     conn = get_db_connection()
-    conn.execute('DELETE FROM records WHERE id = ?', (record_id,))
+    conn.execute('DELETE FROM tb_item WHERE id = ?', (record_id,))
     conn.commit()
     conn.close()
     return jsonify(success=True)
 
-@app.route('/records')
+@app.route('/tb_item')
 def records():
     conn = get_db_connection()
-    records = conn.execute('SELECT * FROM records').fetchall()
+    records = conn.execute('SELECT * FROM tb_item').fetchall()
     conn.close()
-    return render_template('records.html', records=records)
+    return render_template('records.html', items=records)
+
+# Route to handle the drag-and-drop action of items between containers
+@app.route('/move', methods=['POST'])
+def move():
+    data = request.get_json()
+    source_type = data['source_type']
+    source_id = data['source_id']
+    target_type = data['target_type']
+    target_id = data['target_id']
+
+    # Update the database with the new relationship
+    if source_type == 'wp' and target_type == 'project':
+        # Update the rel_Project_WP table
+        pass
+    elif source_type == 'subwp' and target_type == 'wp':
+        # Update the rel_WP_subWP table
+        pass
+    elif source_type == 'item' and target_type == 'subwp':
+        # Update the rel_subWP_item table
+        pass
+
+    return jsonify({'success': True})
+
 
 if __name__ == '__main__':
     # Ensure the upload folder exists

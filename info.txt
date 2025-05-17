@@ -1,0 +1,53 @@
+I have the following code in git (https://github.com/magnificu/dragcon.git) that creates, edit and delete "items" in an sqlite db.
+I want to extend this code as follows:
+
+Project
+|-WP1
+| |-subWP1.1
+| | |-item1.1.1
+| | |-item1.1.2
+| | |-item1.1.3
+| |
+| |-subWP1.2
+| | |-item1.2.1
+| |
+|-WP2
+| |-subWP2.1
+| | |-item2.1.1
+| |
+| |-subWP2.2
+| | |-item2.2.1
+| | |-item2.2.2
+
+
+Database update:
+Give me the query to create the database including some dummy data
+
+
+1. new "tb_Project" table that will contain the name of the new dragable window
+2. new relational "rel_Project_WP" table that must save the relation id_Project and id_WP
+3. When the WP is drop in the Project window box area, a database link needs to be established
+4. new "tb_WP" table that will contain the name of the new dragable window
+5. new relational "rel_WP_subWP" table that must save the relation id_WP and id_subWP
+6. When the subWP is drop in the WP window box area, a database link needs to be established
+7. new "tb_subWP" table that will contain the name of the new dragable window
+8. new relational "rel_subWP_item" table that must save the relation id_subWP and id_item
+9. When the items are drop in the subWP window box area, a database link needs to be established
+
+
+User Interface update
+
+1. "Project" dragable window that have inside a gray box area (<div>) where the user can drag and drop "WP" window.
+2. Multiple links of the same "WP" should be allowed and must be shown individualy in the "Project" window box area.
+3. The box area should highlight when the "WP" hovers above.
+4. "WP" dragable window that have inside a gray box area where I want to drag and drop the "subWP" window.
+5. Multiple links of the same "subWP" should be allowed and must be shown individualy in the "WP" window box area.
+6. The box area should highlight when the "subWP" hovers above.
+7. "subWP" dragable window that have inside a gray box area (<div>) where the user can drag and drop "items" from the items dragable window.
+8. Multiple links of the same item should be allowed and must be shown individualy in the "subWP" window box area.
+9. The box area should highlight when the "item" hovers above.
+10. The items window to create, edit and delete "items" exists already. This can be updated if requred to implement the above.
+
+Other drag and drop links should not be allowed (e.g. item to Project or item to WP, etc.)
+
+Give me the udpated code

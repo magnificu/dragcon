@@ -5,24 +5,27 @@ body {
 
 /* Common draggable window style (main window & modals) */
 .draggable {
-    position: absolute;              /* Allows the element to be moved around */
-    top: 100px;
+    position: absolute;
+    top: 100px; /* Initial position */
     left: 100px;
-    width: 400px;
+    min-width: 250px;
+    min-height: 150px;
+    padding: 10px;
+    border: 1px solid #ccc;
     background: rgba(50, 50, 50, 0.9); /* Semi-transparent dark gray background */
-    border-radius: 8px;              /* Rounded corners */
-    color: white;                    /* White text color for contrast */
-    z-index: 1000;                   /* Ensure it's above most elements */
+    box-sizing: border-box;
+    z-index: 1000;
 }
 
-/* Header bar of draggable windows */
+/* Header bar of draggable windows (same style as Item window) */
 .window-header {
-    padding: 10px;
-    background: rgba(30, 30, 30, 0.95); /* Slightly darker header for contrast */
-    cursor: move;                      /* Indicates it's draggable */
-    display: flex;
-    justify-content: space-between;   /* Space between title and close button */
-    align-items: center;              /* Center items vertically */
+    cursor: move;
+    background: rgba(60, 60, 60, 0.95); /* Dark gray background like Item window */
+    padding: 5px;
+    text-align: center;
+    display: flex;               /* Flexbox layout */
+    justify-content: space-between; /* Space between title and close button */
+    align-items: center;         /* Align items vertically in the center */
 }
 
 /* Footer section for buttons inside draggable windows */
@@ -31,22 +34,43 @@ body {
     text-align: right; /* Align buttons to the right */
 }
 
+.drop-zone {
+    flex-grow: 1;
+    border: 1px dashed #ccc;
+    margin-top: 10px;
+    padding: 5px;
+    background-color: #fafafa;
+    min-height: 50px;
+}
+
+.card {
+    margin: 5px;
+    padding: 5px;
+    border: 1px solid #ddd;
+    background-color: #fff;
+    cursor: move;
+}
+
 /* Modal-specific window style (used for create/edit/delete modals) */
 .modal-window {
-    position: absolute;
-    top: 150px;
-    left: 150px;
-    width: 350px;
-    background: rgba(60, 60, 60, 0.95); /* Slightly lighter than the main window */
+    background: rgba(60, 60, 60, 0.95);
     border-radius: 8px;
     color: white;
     z-index: 2000; /* Higher z-index to sit above the main window */
+    display: inline-block;
+    min-width: 300px;
+    width: fit-content;
+    max-width: 90vw;
+    max-height: 90vh;
+    overflow: auto;
 }
 
 /* Styling form inputs inside modals */
 .modal-body input {
     background-color: #eee; /* Light input background for visibility */
     color: #000;            /* Dark text for contrast inside input fields */
+    width: 100%;
+    box-sizing: border-box;
 }
 
 /* Container holding all records */
@@ -91,6 +115,7 @@ body {
     width: 1rem;
     height: 1rem;
     opacity: 0.8;              /* Slight transparency */
+    margin-left: auto;          /* Push it to the right */
 }
 
 /* Hover effect for close button */

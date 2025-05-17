@@ -21,6 +21,7 @@ $(document).on("mousemove", function (e) {
         const top = e.clientY - offsetY;
         const maxX = $(window).width() - dragTarget.outerWidth();
         const maxY = $(window).height() - dragTarget.outerHeight();
+
         dragTarget.css({
             left: Math.max(0, Math.min(maxX, left)),
             top: Math.max(0, Math.min(maxY, top)),
@@ -29,6 +30,7 @@ $(document).on("mousemove", function (e) {
 });
 
 // Modal Open/Close Helpers
+/*
 function openModal(id) {
     $("#" + id).show();
 }
@@ -36,6 +38,15 @@ function openModal(id) {
 function closeModal(id) {
     $("#" + id).hide();
 }
+*/
+function openModal(modalId) {
+    document.getElementById(modalId).style.display = 'block';
+}
+
+function closeModal(modalId) {
+    document.getElementById(modalId).style.display = 'none';
+}
+
 
 // Preview image before saving
 $("#edit-image").on("change", function (e) {
@@ -55,7 +66,7 @@ $("#edit-image").on("change", function (e) {
 function reloadRecords() {
     const lastSelectedId = selectedRecordId;
 
-    $("#records-container").load("/records", function () {
+    $("#records-container").load("/tb_item", function () {
         if (lastSelectedId) {
             const selected = $(`.record-box[data-id='${lastSelectedId}']`);
             selected.addClass('selected');
@@ -182,4 +193,11 @@ $(document).on('click', function (e) {
     }
 });
 
-
+// avoid windows overlapp (when created)
+$(document).ready(function () {
+    $(".draggable").each(function (index) {
+        const initialLeft = 100 + index * 40;
+        const initialTop = 100 + index * 40;
+        $(this).css({ left: initialLeft + "px", top: initialTop + "px" });
+    });
+});
