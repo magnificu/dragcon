@@ -57,9 +57,9 @@ $("#edit-image").on("change", function (e) {
 // CRUD operations
 function reloadRecords() {
     const lastSelectedId = selectedRecordId;
-    $("#records-container").load("/tb_item", function () {
+    $("#items-container").load("/tb_item", function () {
         if (lastSelectedId) {
-            const selected = $(`.record-box[data-id='${lastSelectedId}']`);
+            const selected = $(`.item-box[data-id='${lastSelectedId}']`);
             selected.addClass('selected');
             selectedRecordId = lastSelectedId;
         } else {
@@ -83,7 +83,7 @@ function editRecord() {
         return;
     }
 
-    const selected = $(`.record-box[data-id='${selectedRecordId}']`);
+    const selected = $(`.item-box[data-id='${selectedRecordId}']`);
     const currentName = selected.attr("data-name");
     const currentImage = selected.attr("data-image");
 
@@ -151,9 +151,9 @@ function confirmDelete() {
 $(document).on('click', function (e) {
     const $target = $(e.target);
 
-    if ($target.closest('.record-box').length) {
-        $('.record-box').removeClass('selected');
-        const $box = $target.closest('.record-box');
+    if ($target.closest('.item-box').length) {
+        $('.item-box').removeClass('selected');
+        const $box = $target.closest('.item-box');
         $box.addClass('selected');
         selectedRecordId = $box.data('id');
     } else if (
@@ -162,7 +162,7 @@ $(document).on('click', function (e) {
         !$target.hasClass('btn') &&
         !$target.hasClass('btn-close')
     ) {
-        $('.record-box').removeClass('selected');
+        $('.item-box').removeClass('selected');
         selectedRecordId = null;
     }
 });

@@ -31,7 +31,7 @@ def index():
     return render_template('index.html', projects=projects, wps=wps, subwps=subwps, items=items)
 
 @app.route('/create', methods=['POST'])
-def create():
+def create_item():
     name = request.form['name']
     image_file = request.files.get('image')  # Get image file from the request
 
@@ -54,7 +54,7 @@ def create():
     return jsonify(success=True)
 
 @app.route('/edit', methods=['POST'])
-def edit():
+def edit_item():
     record_id = request.form['id']
     name = request.form['name']
     image_file = request.files.get('image')  # Get image file from the request
@@ -79,7 +79,7 @@ def edit():
     return jsonify(success=True)
 
 @app.route('/delete', methods=['POST'])
-def delete():
+def delete_item():
     record_id = request.form['id']
     conn = get_db_connection()
     conn.execute('DELETE FROM tb_item WHERE id = ?', (record_id,))
@@ -88,11 +88,11 @@ def delete():
     return jsonify(success=True)
 
 @app.route('/tb_item')
-def records():
+def get_items():
     conn = get_db_connection()
     records = conn.execute('SELECT * FROM tb_item').fetchall()
     conn.close()
-    return render_template('records.html', items=records)
+    return render_template('items.html', items=records)
 
 # Route to handle the drag-and-drop action of items between containers
 @app.route('/move', methods=['POST'])

@@ -74,7 +74,7 @@ body {
 }
 
 /* Container holding all records */
-.record-list {
+.item-list {
     padding: 10px;
     display: flex;
     flex-wrap: wrap;
@@ -84,7 +84,7 @@ body {
 }
 
 /* Individual record box style */
-.record-box {
+.item-box {
     width: 100px;
     background: #333;
     padding: 5px;
@@ -96,16 +96,22 @@ body {
 }
 
 /* Record image formatting */
-.record-box img {
+.item-box img {
     max-width: 100%;       /* Ensure the image fits the box width */
     height: auto;          /* Maintain aspect ratio */
     border-radius: 3px;    /* Slightly rounded image corners */
 }
 
 /* Text (record name) under each image */
-.record-box p {
+.item-box p {
     margin: 5px 0 0;
     font-size: 0.9em;
+}
+
+/* Highlight style for selected record */
+.item-box.selected {
+    border: 2px solid #00f;    /* Blue border indicates selection */
+    background-color: #555;    /* Slightly lighter background for visual cue */
 }
 
 /* Close button (styled to be visible on dark background) */
@@ -122,10 +128,4 @@ body {
 .btn-close:hover {
     opacity: 1;
     background-color: red;     /* Red background on hover to indicate danger/close */
-}
-
-/* Highlight style for selected record */
-.record-box.selected {
-    border: 2px solid #00f;    /* Blue border indicates selection */
-    background-color: #555;    /* Slightly lighter background for visual cue */
 }
