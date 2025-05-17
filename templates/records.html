@@ -1,0 +1,11 @@
+<div class="record-list">
+    {% for record in records %}
+    <div class="record-box" 
+         data-id="{{ record.id }}" 
+         data-name="{{ record.name }}" 
+         data-image="{{ record.image_url }}">
+        <img src="{{ record.image_url }}" alt="{{ record.name }}">
+        <p>{{ record.name }}</p>
+    </div>
+    {% endfor %}
+</div>

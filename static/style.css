@@ -1,0 +1,106 @@
+/* General page background */
+body {
+    background-color: #f5f5f5; /* Light gray background for contrast with dark windows */
+}
+
+/* Common draggable window style (main window & modals) */
+.draggable {
+    position: absolute;              /* Allows the element to be moved around */
+    top: 100px;
+    left: 100px;
+    width: 400px;
+    background: rgba(50, 50, 50, 0.9); /* Semi-transparent dark gray background */
+    border-radius: 8px;              /* Rounded corners */
+    color: white;                    /* White text color for contrast */
+    z-index: 1000;                   /* Ensure it's above most elements */
+}
+
+/* Header bar of draggable windows */
+.window-header {
+    padding: 10px;
+    background: rgba(30, 30, 30, 0.95); /* Slightly darker header for contrast */
+    cursor: move;                      /* Indicates it's draggable */
+    display: flex;
+    justify-content: space-between;   /* Space between title and close button */
+    align-items: center;              /* Center items vertically */
+}
+
+/* Footer section for buttons inside draggable windows */
+.window-footer {
+    padding: 10px;
+    text-align: right; /* Align buttons to the right */
+}
+
+/* Modal-specific window style (used for create/edit/delete modals) */
+.modal-window {
+    position: absolute;
+    top: 150px;
+    left: 150px;
+    width: 350px;
+    background: rgba(60, 60, 60, 0.95); /* Slightly lighter than the main window */
+    border-radius: 8px;
+    color: white;
+    z-index: 2000; /* Higher z-index to sit above the main window */
+}
+
+/* Styling form inputs inside modals */
+.modal-body input {
+    background-color: #eee; /* Light input background for visibility */
+    color: #000;            /* Dark text for contrast inside input fields */
+}
+
+/* Container holding all records */
+.record-list {
+    padding: 10px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center; /* Ensures rows are centered horizontally */
+    box-sizing: border-box;  /* Include padding in width calculations */
+}
+
+/* Individual record box style */
+.record-box {
+    width: 100px;
+    background: #333;
+    padding: 5px;
+    border-radius: 5px;
+    text-align: center;
+    cursor: pointer;
+    transition: 0.2s;
+    box-sizing: border-box; /* Prevent padding from expanding actual width */
+}
+
+/* Record image formatting */
+.record-box img {
+    max-width: 100%;       /* Ensure the image fits the box width */
+    height: auto;          /* Maintain aspect ratio */
+    border-radius: 3px;    /* Slightly rounded image corners */
+}
+
+/* Text (record name) under each image */
+.record-box p {
+    margin: 5px 0 0;
+    font-size: 0.9em;
+}
+
+/* Close button (styled to be visible on dark background) */
+.btn-close {
+    background-color: white;   /* Makes button visible on dark header */
+    border: none;
+    width: 1rem;
+    height: 1rem;
+    opacity: 0.8;              /* Slight transparency */
+}
+
+/* Hover effect for close button */
+.btn-close:hover {
+    opacity: 1;
+    background-color: red;     /* Red background on hover to indicate danger/close */
+}
+
+/* Highlight style for selected record */
+.record-box.selected {
+    border: 2px solid #00f;    /* Blue border indicates selection */
+    background-color: #555;    /* Slightly lighter background for visual cue */
+}
