@@ -78,7 +78,8 @@
                 <img id="image-button" src="/static/images/question.png" alt="Click to select image" width="120" style="cursor: pointer; border: 2px dashed #ccc; padding: 5px;">
                 
                 <p class="small text-muted">Click the image to change it</p>
-            </div>            
+            </div>                        <button id="model1-button" onclick="selectModel(1)">Select Model 1</button>
+                        <button id="model2-button" onclick="selectModel(2)">Select Model 2</button>
 
             <div class="mb-2">
                 <label>Properties (JSON):</label>
@@ -121,25 +122,69 @@
     </div>
     
     <!-- STL Viewer Window -->
-    <div id="stl-window" class="draggable" style="width: 640px; height: 480px; display: block;">
+    <div id="stl-window" class="draggable">
         <div class="window-header">
             <button class="btn-close" onclick="document.getElementById('stl-window').style.display='none'"></button>
         </div>
 
-        <div id="viewerContainer" style="width: 100%; height: 100%; background: #ccc;"></div>
+        <div id="viewer-area">
+            <!-- Left: Viewer -->
+            <div id="viewerContainer"></div>
 
+            <!-- Right: Info Panel -->
+            <div id="model-info-panel">
+                <h6>Selected Object</h6>
+                <div class="form-group mb-2">
+                    <label>X:</label>
+                    <input type="text" id="pos-x" class="form-control form-control-sm">
+                </div>
+                <div class="form-group mb-2">
+                    <label>Y:</label>
+                    <input type="text" id="pos-y" class="form-control form-control-sm">
+                </div>
+                <div class="form-group mb-2">
+                    <label>Z:</label>
+                    <input type="text" id="pos-z" class="form-control form-control-sm">
+                </div>
+
+                <hr style="border-color: #444;">
+
+                <div class="form-group mb-2">
+                    <label>U (Roll):</label>
+                    <input type="text" id="rot-u" class="form-control form-control-sm">
+                </div>
+                <div class="form-group mb-2">
+                    <label>V (Pitch):</label>
+                    <input type="text" id="rot-v" class="form-control form-control-sm">
+                </div>
+                <div class="form-group mb-2">
+                    <label>W (Yaw):</label>
+                    <input type="text" id="rot-w" class="form-control form-control-sm">
+                </div>
+            </div>
+        </div>
+        <!-- Footer with Save Button -->
+        <div class="window-footer">
+            <input type="hidden" id="model-id" value="1"> <!-- Example model ID, this should be dynamically set -->
+            <button id="save-button" class="btn btn-success btn-sm" onclick="saveModelPosition()">Save</button>
+        </div>
+
+        <!-- Button group for transformation modes -->
         <div class="btn-group" style="position: absolute; top: 10px; left: 10px; z-index: 10;">
-            <!-- Add the "Visualization" button -->
             <button id="visualization-button" class="btn btn-sm btn-outline-secondary" onclick="setTransformMode('visualization')">Visualization</button>
             <button id="translate-button" class="btn btn-sm btn-outline-primary" onclick="setTransformMode('translate')">Translate</button>
             <button id="rotate-button" class="btn btn-sm btn-outline-success" onclick="setTransformMode('rotate')">Rotate</button>
         </div>
     </div>
 
-    <script type="module" src="{{ url_for('static', filename='js/viewer.js') }}"></script>
-
-    <!-- Scripts -->
+    <!-- Include jQuery (if necessary for other parts of the site) -->
     <script src="/static/js/jquery-3.7.1.min.js"></script>
+    
+    <!-- Include viewer.js -->
+    <script type="module" src="{{ url_for('static', filename='js/viewer.js') }}"></script>
+    
+    <!-- Make sure you only load viewer.js once -->
     <script src="/static/js/main.js"></script>
+
 </body>
 </html>

@@ -31,7 +31,12 @@ body {
 /* Footer section for buttons inside draggable windows */
 .window-footer {
     padding: 10px;
-    text-align: right; /* Align buttons to the right */
+    text-align: right; /* Align button to the right */
+    background-color: #333; /* Dark background for footer */
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%; /* Ensure it spans across the full width */
 }
 
 .drop-zone {
@@ -135,4 +140,46 @@ button.active {
     background-color: #007bff;
     color: white;
     border-color: #007bff;
+}
+
+#stl-window {
+    position: relative;
+    display: block;
+    overflow: hidden;
+    width: 1200px; /* Set a fixed width for the stl window */
+    height: 800px;
+}
+
+#viewer-area {
+    display: flex;
+    width: 100%; /* Make sure it takes up full width */
+    height: calc(100% - 40px); /* Adjust for top bar */
+}
+
+#viewerContainer {
+    background-color: #ccc;
+    flex-grow: 1;  /* Take up the available space */
+    margin-right: 0; /* Ensure no right margin causing extra space */
+}
+
+#model-info-panel label {
+    font-size: 0.85em;
+    color: #ddd;
+}
+
+#model-info-panel input {
+    background-color: #444;
+    color: white;
+    border: 1px solid #666;
+}
+
+/* Info panel shown */
+#model-info-panel {
+    width: 150px; /* Adjust the panel width as needed */
+    background: #222;
+    color: white;
+    padding: 10px;
+    overflow-y: auto;
+    height: 100%; /* Ensure the info panel takes full height */
+    margin: 0; /* Make sure no extra margin is causing spacing issues */
 }

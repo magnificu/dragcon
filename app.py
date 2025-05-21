@@ -144,6 +144,87 @@ def move():
 
     return jsonify({'success': True})
 
+@app.route('/save_model_position', methods=['POST'])
+def save_model_position():
+    data = request.get_json()
+
+    # Log the received data for debugging purposes
+    print("Received data:", data)
+
+    # Extract data from the request
+    pos_x = data.get('x')
+    pos_y = data.get('y')
+    pos_z = data.get('z')
+    rot_u = data.get('u')
+    rot_v = data.get('v')
+    rot_w = data.get('w')
+    model_id = data.get('id')  # Get the model ID from the request
+
+    # Log model ID for debugging
+    print(f"Received Model ID: {model_id}")
+
+    # Ensure the model ID is provided
+    if not model_id:
+        return jsonify({"success": False, "message": "Model ID is missing"}), 400
+
+    # Save the position and rotation values to the database for the correct model ID
+    try:
+        conn = get_db_connection()
+        conn.execute(
+            'UPDATE tb_WP SET pos_x = ?, pos_y = ?, pos_z = ?, rot_u = ?, rot_v = ?, rot_w = ? WHERE id = ?',
+            (pos_x, pos_y, pos_z, rot_u, rot_v, rot_w, model_id)  # Update the correct model by ID
+        )
+        conn.commit()
+        conn.close()
+        return jsonify(success=True)
+    except Exception as e:
+        print(f"Error saving model position: {e}")
+        return jsonify({"success": False, "message": str(e)}), 500
+
+
+# Get 3d models from the database
+@app.route('/get_model_data', methods=['GET'])
+def get_model_data():
+    conn = get_db_connection()
+
+    # Get the 'id' from the query parameters or return all models if 'id' is not provided
+    model_id = request.args.get('id', default=None, type=int)  # No default value if you want all models
+
+    if model_id:
+        # Query for a specific model if an ID is given
+        query = """
+            SELECT id, name, `3d_model`, pos_x, pos_y, pos_z, rot_u, rot_v, rot_w 
+            FROM tb_WP WHERE id = ?
+        """
+        result = conn.execute(query, (model_id,)).fetchall()
+    else:
+        # Query for all models if no ID is given
+        query = """
+            SELECT id, name, `3d_model`, pos_x, pos_y, pos_z, rot_u, rot_v, rot_w 
+            FROM tb_WP
+        """
+        result = conn.execute(query).fetchall()
+
+    # Prepare model data with position and rotation
+    models = [{
+        'id': row['id'],
+        'name': row['name'],
+        'model_path': row['3d_model'],
+        'position': {
+            'x': row['pos_x'],
+            'y': row['pos_y'],
+            'z': row['pos_z']
+        },
+        'rotation': {
+            'u': row['rot_u'],
+            'v': row['rot_v'],
+            'w': row['rot_w']
+        }
+    } for row in result]
+
+    # Return model data as JSON
+    return jsonify(models)
+
 
 if __name__ == '__main__':
     # Ensure the upload folder exists

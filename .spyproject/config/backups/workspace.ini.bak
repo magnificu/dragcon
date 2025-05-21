@@ -4,7 +4,7 @@ save_data_on_exit = True
 save_history = True
 save_non_project_files = False
 project_type = 'empty-project-type'
-recent_files = ['app.py', 'templates/index.html', 'static/css/style.css', 'static/js/main.js', 'templates/items.html', 'static/js/stl_loader.js']
+recent_files = ['app.py', 'templates/index.html', 'static/css/style.css', 'static/js/main.js', 'templates/items.html', 'static/js/viewer.js']
 
 [main]
 version = 0.2.0
