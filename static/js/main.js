@@ -40,19 +40,23 @@ function closeModal(modalId) {
     document.getElementById(modalId).style.display = 'none';
 }
 
-// Preview image
+// Trigger file input when image is clicked
+$("#image-button").on("click", function () {
+    $("#edit-image").click();
+});
+
+// When a new image is selected, update preview
 $("#edit-image").on("change", function (e) {
     const file = e.target.files[0];
     if (file) {
         const reader = new FileReader();
         reader.onload = function (event) {
-            $("#image-preview").html(`<img src="${event.target.result}" alt="Image preview" width="100">`);
+            $("#image-button").attr("src", event.target.result);
         };
         reader.readAsDataURL(file);
-    } else {
-        $("#image-preview").empty();
     }
 });
+
 
 // CRUD operations
 function reloadRecords() {
@@ -91,7 +95,9 @@ function editRecord() {
     $("#edit-modal-title").text("Edit Record");
     $("#edit-name").val(currentName);
     $("#edit-image").val("");
-    $("#image-preview").html(`<img src="${currentImage}" alt="Current Image" width="100">`);
+    //$("#image-preview").html(`<img src="${currentImage}" alt="Current Image" width="100">`);
+    $("#image-button").attr("src", currentImage);
+
 
     // Load property JSON
     $.get(`/item/${selectedRecordId}/property`, function (response) {

@@ -4,7 +4,7 @@ import json
 import sqlite3
 from werkzeug.utils import secure_filename
 
-app = Flask(__name__)
+app = Flask(__name__, static_url_path='/static')
 
 # Configure the upload folder and allowed extensions for images
 app.config['UPLOADED_IMAGES_DEST'] = 'static/images'
@@ -30,6 +30,10 @@ def index():
     items = conn.execute('SELECT * FROM tb_item').fetchall()
     conn.close()
     return render_template('index.html', projects=projects, wps=wps, subwps=subwps, items=items)
+
+@app.route('/viewer')
+def viewer():
+    return render_template('viewer.html')  # or index.html if reused
 
 @app.route('/create', methods=['POST'])
 def create_item():

@@ -69,11 +69,17 @@
                 <label>Name:</label>
                 <input type="text" id="edit-name" class="form-control">
             </div>
-            <div class="mb-2">
-                <label>Image (PNG):</label>
-                <input type="file" id="edit-image" class="form-control" accept=".png">
-            </div>
-            <div id="image-preview"></div>
+           
+            <div class="mb-2 text-center">
+                <!-- Hidden file input -->
+                <input type="file" id="edit-image" accept=".png" style="display: none;">
+                
+                <!-- Image acting as a button -->
+                <img id="image-button" src="/static/images/question.png" alt="Click to select image" width="120" style="cursor: pointer; border: 2px dashed #ccc; padding: 5px;">
+                
+                <p class="small text-muted">Click the image to change it</p>
+            </div>            
+
             <div class="mb-2">
                 <label>Properties (JSON):</label>
                 <textarea id="edit-property" class="form-control" rows="5" placeholder='{"key": "value"}'></textarea>
@@ -113,6 +119,24 @@
             <button class="btn btn-secondary btn-sm" onclick="closeModal('delete-modal')">Cancel</button>
         </div>
     </div>
+    
+    <!-- STL Viewer Window -->
+    <div id="stl-window" class="draggable" style="width: 640px; height: 480px; display: block;">
+        <div class="window-header">
+            <button class="btn-close" onclick="document.getElementById('stl-window').style.display='none'"></button>
+        </div>
+
+        <div id="viewerContainer" style="width: 100%; height: 100%; background: #ccc;"></div>
+
+        <div class="btn-group" style="position: absolute; top: 10px; left: 10px; z-index: 10;">
+            <!-- Add the "Visualization" button -->
+            <button id="visualization-button" class="btn btn-sm btn-outline-secondary" onclick="setTransformMode('visualization')">Visualization</button>
+            <button id="translate-button" class="btn btn-sm btn-outline-primary" onclick="setTransformMode('translate')">Translate</button>
+            <button id="rotate-button" class="btn btn-sm btn-outline-success" onclick="setTransformMode('rotate')">Rotate</button>
+        </div>
+    </div>
+
+    <script type="module" src="{{ url_for('static', filename='js/viewer.js') }}"></script>
 
     <!-- Scripts -->
     <script src="/static/js/jquery-3.7.1.min.js"></script>
