@@ -6,6 +6,15 @@ let offsetX, offsetY;
 let dragTarget = null;
 let selectedRecordId = null;
 let editingExisting = false;
+let highestZ = 1000;
+
+// Brings the active draggable window to the front by increasing its z-index.
+document.querySelectorAll('.draggable').forEach(win => {
+    win.addEventListener('mousedown', () => {
+        highestZ++;
+        win.style.zIndex = highestZ;
+    });
+});
 
 // Draggable modals
 $(document).on("mousedown", ".window-header", function (e) {

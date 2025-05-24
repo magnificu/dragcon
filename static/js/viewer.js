@@ -21,7 +21,7 @@ function init() {
     const container = document.getElementById('viewerContainer');
     
     scene = new THREE.Scene();
-    scene.background = new THREE.Color(0xf0f0f0);
+    scene.background = null;
 
     // Lights
     scene.add(new THREE.AmbientLight(0xffffff, 0.6));
@@ -33,7 +33,7 @@ function init() {
     setupCamera(container);
 
     // Renderer
-    renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     renderer.setSize(container.clientWidth, container.clientHeight);
     container.appendChild(renderer.domElement);
 
@@ -80,59 +80,70 @@ function setupCamera(container) {
 }
 
 function loadModels() {
-    fetch('/get_model_data')  // Do not pass `id` to fetch all models
-        .then(response => response.json())
+    // Fetch model data from the server
+    fetch('/get_model_data')
+        .then(response => response.json())  // response as JSON
         .then(models => {
-            console.log("Models received:", models);
-
-            models.forEach((modelData, index) => {
-                const modelPath = modelData.model_path;
-                console.log("Loading model:", modelPath);
-
+            // Create an array of promises, each loading a model
+            const loaders = models.map(modelData => new Promise((resolve, reject) => {
                 const loader = new STLLoader();
-                loader.load(modelPath, (geometry) => {
-                    geometry.computeVertexNormals();
 
+                // Load the STL file geometry
+                loader.load(modelData.model_path, geometry => {
+                    geometry.computeVertexNormals();  // Improve lighting by computing normals
+
+                    // Create material for the mesh
                     const material = new THREE.MeshStandardMaterial({
                         color: 0x6699ff,
                         metalness: 0.1,
                         roughness: 0.6
                     });
 
+                    // Create mesh from geometry and material
                     const mesh = new THREE.Mesh(geometry, material);
-                    mesh.scale.set(1, 1, 1);  // Scale model correctly
-                    
-                    // Use the position and rotation values from the database
+
+                    // Apply scale (default 1)
+                    mesh.scale.set(1, 1, 1);
+
+                    // Set mesh position from model data
                     mesh.position.set(
-                        modelData.position.x,  // Set position from database
+                        modelData.position.x,
                         modelData.position.y,
                         modelData.position.z
                     );
-                    
+
+                    // Set mesh rotation from model data (degrees to radians)
                     mesh.rotation.set(
-                        THREE.MathUtils.degToRad(modelData.rotation.u),  // Convert degrees to radians
+                        THREE.MathUtils.degToRad(modelData.rotation.u),
                         THREE.MathUtils.degToRad(modelData.rotation.v),
                         THREE.MathUtils.degToRad(modelData.rotation.w)
                     );
 
-                    mesh.name = modelPath.split('/').pop();  // Set the model name based on the path
+                    // Name the mesh based on the filename
+                    mesh.name = modelData.model_path.split('/').pop();
 
+                    // Store model ID for reference
                     mesh.modelId = modelData.id;
-                    scene.add(mesh);  // Add model to the scene
 
-                    // Fit the view after models are loaded
-                    if (index === models.length - 1) {
-                        fitAllModelsInView();  // Adjust camera to fit all models
-                    }
-                }, undefined, (error) => {
-                    console.error(`Error loading model at ${modelPath}:`, error);
-                });
+                    // Add the mesh to the scene
+                    scene.add(mesh);
+
+                    resolve(mesh);  // Resolve the promise once loaded
+                }, undefined, reject);  // Reject promise on error
+            }));
+
+            // Wait until all models have loaded, then fit them all into view
+            Promise.all(loaders).then(() => {
+                fitAllModelsInView();
+            }).catch(error => {
+                console.error('Error loading models:', error);
             });
         })
         .catch(error => {
             console.error('Error fetching model data:', error);
         });
 }
+
 
 function setupTransformControls() {
     transformControl = new TransformControls(camera, renderer.domElement);
@@ -178,61 +189,136 @@ function updateButtonState(mode) {
     });
 }
 
+// DEBUG: fitAllModelsInView
+// Displays a small red sphere to mark the center of the bounding box
+let centerBoxMarker = null;
+let boundingBoxHelper = null;
+ 
+function showCenterBoxMarker(position) {
+  if (centerBoxMarker) {
+    // Remove previous marker and dispose resources
+    scene.remove(centerBoxMarker);
+    centerBoxMarker.geometry.dispose();
+    centerBoxMarker.material.dispose();
+    centerBoxMarker = null;
+  }
+
+  // Create a small red sphere geometry
+  const geometry = new THREE.SphereGeometry(2, 16, 16);  // radius 2, detail 16x16
+  const material = new THREE.MeshBasicMaterial({ color: 0xff0000 }); // red color
+
+  // Create mesh and position it at the given point
+  centerBoxMarker = new THREE.Mesh(geometry, material);
+  centerBoxMarker.position.copy(position);
+
+  // Add marker
+  scene.add(centerBoxMarker);
+}
+
+// DEBUG: fitAllModelsInView
+// Creates and displays a red wireframe box around the models
+function showBoundingBox(box) {
+  if (boundingBoxHelper) {
+    // Remove previous helper and resources
+    scene.remove(boundingBoxHelper);
+    boundingBoxHelper.geometry.dispose();
+    boundingBoxHelper.material.dispose();
+    boundingBoxHelper = null;
+  }
+
+  // Get size of the bounding box
+  const size = box.getSize(new THREE.Vector3());
+
+  // Create box geometry matching the bounding box size
+  const geometry = new THREE.BoxGeometry(size.x, size.y, size.z);
+
+  // Create edges geometry for wireframe outline
+  const edges = new THREE.EdgesGeometry(geometry);
+  const material = new THREE.LineBasicMaterial({ color: 0xff0000 }); // red wireframe
+
+  // Create line segments mesh for wireframe
+  boundingBoxHelper = new THREE.LineSegments(edges, material);
+
+  // Position the wireframe at the center of the bounding box
+  const center = box.getCenter(new THREE.Vector3());
+  boundingBoxHelper.position.copy(center);
+
+  // Add wireframe helper
+  scene.add(boundingBoxHelper);
+}
+
+// Fits all mesh models in the scene and camera view
 function fitAllModelsInView() {
-    // 1. Calculate the bounding box of all objects in the scene
-    const box = new THREE.Box3();
-    scene.traverse((obj) => {
+    scene.updateMatrixWorld(true);
+
+    let box = null;
+
+    scene.traverse(obj => {
         if (obj.isMesh) {
-            obj.geometry.computeBoundingBox();
-            // Apply world matrix to get correct bounding box in world space
-            const objBox = obj.geometry.boundingBox.clone();
-            objBox.applyMatrix4(obj.matrixWorld);
-            box.union(objBox);
+            if (!obj.geometry.boundingBox) {
+                obj.geometry.computeBoundingBox();
+            }
+
+            const geomBox = obj.geometry.boundingBox.clone();
+            geomBox.applyMatrix4(obj.matrixWorld);
+
+            if (box === null) {
+                box = geomBox.clone();
+            } else {
+                box.union(geomBox);
+            }
         }
     });
 
-    if (box.isEmpty()) {
-        console.warn("Bounding box is empty.");
+    if (!box || box.isEmpty()) {
+        console.warn("Bounding box is empty or no meshes found.");
         return;
     }
 
-    // 2. Get the center and size of the bounding box
-    const center = new THREE.Vector3();
-    const size = new THREE.Vector3();
-    box.getCenter(center);
-    box.getSize(size);
+    // DEBUG: Show red bounding box wireframe around all models
+    // showBoundingBox(box);
 
-    // 3. Calculate a zoom factor and camera position based on the size of the bounding box
-    const margin = 1.2; // Add some margin around the bounding box
+    const center = box.getCenter(new THREE.Vector3());
+    
+    // DEBUG: Show center of the red bounding box wireframe
+    // showCenterBoxMarker(center);
+    
+    const size = box.getSize(new THREE.Vector3());
     const maxDim = Math.max(size.x, size.y, size.z);
-    const distance = maxDim * margin;
+    const margin = 1.2; // margin around bounding box
 
-    // 4. Get the viewer container's dimensions
-    const viewerWidth = window.innerWidth;  // or get the width of your viewer container
-    const viewerHeight = window.innerHeight; // or get the height of your viewer container
+    const container = document.getElementById('viewerContainer');
+    const viewerWidth = container.clientWidth;
+    const viewerHeight = container.clientHeight;
     const aspect = viewerWidth / viewerHeight;
 
-    // 5. Adjust frustum size to fill the screen based on aspect ratio
-    const frustumSize = distance * 2;  // This is the total size of the view, relative to the bounding box size
+    // Calculate frustum size with margin
+    let frustumHeight = maxDim * margin;
+    let frustumWidth = frustumHeight * aspect;
 
-    // Ensure the frustum is correctly sized for both width and height
-    const frustumWidth = frustumSize * aspect;  // Width of the view based on aspect ratio
-    const frustumHeight = frustumSize;  // Height of the view
+    if (aspect < 1) {
+        frustumWidth = maxDim * margin;
+        frustumHeight = frustumWidth / aspect;
+    }
 
+    // Update orthographic camera frustum
     camera.left = -frustumWidth / 2;
     camera.right = frustumWidth / 2;
     camera.top = frustumHeight / 2;
     camera.bottom = -frustumHeight / 2;
 
-    camera.near = 0.1;
-    camera.far = 1000;
+    // Position camera at some distance along positive Z axis looking at center
+    // Distance formula: move far enough so entire bounding box fits inside frustum
+    // For orthographic camera, distance can be based on maxDim * factor
+    const cameraDistance = maxDim * margin * 2;
+
+    camera.position.set(center.x, center.y, center.z + cameraDistance);
+    camera.near = cameraDistance / 100; // adjust near/far based on cameraDistance
+    camera.far = cameraDistance * 4;
     camera.updateProjectionMatrix();
 
-    // 6. Set camera position behind the center of the bounding box
-    camera.position.set(center.x, center.y, center.z + distance);
     camera.lookAt(center);
 
-    // 7. Update controls target
     controls.target.copy(center);
     controls.update();
 }

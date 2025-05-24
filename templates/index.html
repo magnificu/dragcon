@@ -11,9 +11,9 @@
     <!-- Project Window -->
     <div id="project-window" class="draggable">
       <div class="window-header">
+        <h5>Projects</h5>
         <button class="btn-close" onclick="document.getElementById('project-window').style.display='none'"></button>
       </div>
-      <h3>Projects</h3>
       <div class="drop-zone" data-type="wp" data-target="project-id" ondragover="allowDrop(event)" ondrop="drop(event, 'project')">
         Drop WPs here
       </div>
@@ -22,9 +22,9 @@
     <!-- WP Window -->
     <div id="wp-window" class="draggable">
       <div class="window-header">
+        <h5>WPs</h5>
         <button class="btn-close" onclick="document.getElementById('wp-window').style.display='none'"></button>
       </div>
-      <h3>WPs</h3>
       <div class="drop-zone" data-type="subwp" data-target="wp-id" ondragover="allowDrop(event)" ondrop="drop(event, 'wp')">
         Drop subWPs here
       </div>
@@ -33,27 +33,29 @@
     <!-- subWP Window -->
     <div id="subwp-window" class="draggable">
       <div class="window-header">
+        <h5>SubWPs</h5>
         <button class="btn-close" onclick="document.getElementById('subwp-window').style.display='none'"></button>
       </div>
-      <h3>SubWPs</h3>
       <div class="drop-zone" data-type="item" data-target="subwp-id" ondragover="allowDrop(event)" ondrop="drop(event, 'subwp')">
         Drop Items here
       </div>
     </div>
 
-    <!-- item Window -->
+    <!-- Item Window -->
     <div id="item-window" class="draggable">
         <div class="window-header">
+            <h5>Items</h5>
             <button class="btn-close" onclick="document.getElementById('item-window').style.display='none'"></button>
         </div>
-        <h3>Items</h3>
         <div id="items-container">
             {% include 'items.html' %}
         </div>
         <div class="window-footer">
-            <button class="btn btn-success btn-sm" onclick="createRecord()">New</button>
-            <button class="btn btn-warning btn-sm" onclick="editRecord()">Edit</button>
-            <button class="btn btn-info btn-sm" onclick="propertyRecord()">Properties</button>
+            <div class="btn-group">
+                <button class="btn btn-success btn-sm" onclick="createRecord()">New</button>
+                <button class="btn btn-warning btn-sm" onclick="editRecord()">Edit</button>
+                <button class="btn btn-info btn-sm" onclick="propertyRecord()">Properties</button>
+            </div>
             <button class="btn btn-danger btn-sm" onclick="deleteRecord()">Delete</button>
         </div>
     </div>
@@ -165,15 +167,14 @@
         </div>
         <!-- Footer with Save Button -->
         <div class="window-footer">
+            <!-- Button group for transformation modes -->
+            <div class="btn-group">
+                <button id="visualization-button" class="btn btn-sm btn-outline-secondary" onclick="setTransformMode('visualization')">Visualization</button>
+                <button id="translate-button" class="btn btn-sm btn-outline-primary" onclick="setTransformMode('translate')">Translate</button>
+                <button id="rotate-button" class="btn btn-sm btn-outline-success" onclick="setTransformMode('rotate')">Rotate</button>
+            </div>
             <input type="hidden" id="model-id" value="1"> <!-- Example model ID, this should be dynamically set -->
             <button id="save-button" class="btn btn-success btn-sm" onclick="saveModelPosition()">Save</button>
-        </div>
-
-        <!-- Button group for transformation modes -->
-        <div class="btn-group" style="position: absolute; top: 10px; left: 10px; z-index: 10;">
-            <button id="visualization-button" class="btn btn-sm btn-outline-secondary" onclick="setTransformMode('visualization')">Visualization</button>
-            <button id="translate-button" class="btn btn-sm btn-outline-primary" onclick="setTransformMode('translate')">Translate</button>
-            <button id="rotate-button" class="btn btn-sm btn-outline-success" onclick="setTransformMode('rotate')">Rotate</button>
         </div>
     </div>
 

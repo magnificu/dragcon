@@ -1,6 +1,7 @@
 /* General page background */
 body {
     background-color: #f5f5f5; /* Light gray background for contrast with dark windows */
+    color: black;
 }
 
 /* Common draggable window style (main window & modals) */
@@ -10,9 +11,9 @@ body {
     left: 100px;
     min-width: 250px;
     min-height: 150px;
-    padding: 10px;
+    padding: 5px;
     border: 1px solid #ccc;
-    background: rgba(50, 50, 50, 0.9); /* Semi-transparent dark gray background */
+    background: rgba(50, 50, 50, 0.7);
     box-sizing: border-box;
     z-index: 1000;
 }
@@ -20,23 +21,35 @@ body {
 /* Header bar of draggable windows (same style as Item window) */
 .window-header {
     cursor: move;
-    background: rgba(60, 60, 60, 0.95); /* Dark gray background like Item window */
+    background: rgba(40, 40, 40, 0.7);
     padding: 5px;
-    text-align: center;
+    border-radius: 5px;
     display: flex;               /* Flexbox layout */
     justify-content: space-between; /* Space between title and close button */
     align-items: center;         /* Align items vertically in the center */
 }
 
+#items-container {
+    flex: 1 1 auto;
+    overflow-y: auto;
+    padding: 5px;
+    box-sizing: border-box;
+}
+
 /* Footer section for buttons inside draggable windows */
 .window-footer {
-    padding: 10px;
-    text-align: right; /* Align button to the right */
-    background-color: #333; /* Dark background for footer */
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 100%; /* Ensure it spans across the full width */
+    flex: 0 0 auto;
+    padding: 5px;
+    border-radius: 5px;
+    background-color: rgba(30, 30, 30, 0.7);
+    display: flex;               /* make it flex container */
+    justify-content: space-between;  /* push items to left & right edges */
+    align-items: center;         /* vertically center items */
+}
+
+.btn-group {
+  display: flex;   /* make sure it’s a flex container */
+  gap: 5px;        /* space between buttons */
 }
 
 .drop-zone {
@@ -73,50 +86,65 @@ body {
 /* Styling form inputs inside modals */
 .modal-body input {
     background-color: #eee; /* Light input background for visibility */
-    color: #000;            /* Dark text for contrast inside input fields */
     width: 100%;
+    box-sizing: border-box;
+}
+
+#item-window {
+    width: 640px; /* Enough for 6 items + padding/gap */
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
     box-sizing: border-box;
 }
 
 /* Container holding all records */
 .item-list {
-    padding: 10px;
     display: flex;
     flex-wrap: wrap;
     gap: 10px;
-    justify-content: center; /* Ensures rows are centered horizontally */
-    box-sizing: border-box;  /* Include padding in width calculations */
+    justify-content: flex-start; /* ← changed from center to flex-start */
+    box-sizing: border-box;
 }
 
 /* Individual record box style */
 .item-box {
-    width: 100px;
-    background: #333;
+    width: calc((100% - 50px) / 6); /* 5 gaps × 10px = 50px */
+    background: rgba(40, 40, 40, 0.7);
     padding: 5px;
     border-radius: 5px;
     text-align: center;
     cursor: pointer;
     transition: 0.2s;
-    box-sizing: border-box; /* Prevent padding from expanding actual width */
 }
 
 /* Record image formatting */
 .item-box img {
     max-width: 100%;       /* Ensure the image fits the box width */
     height: auto;          /* Maintain aspect ratio */
-    border-radius: 3px;    /* Slightly rounded image corners */
+    border-radius: 5px;    /* Slightly rounded image corners */
 }
 
 /* Text (record name) under each image */
 .item-box p {
     margin: 5px 0 0;
-    font-size: 0.9em;
+    font-size: 0.8em;
 }
 
 /* Highlight style for selected record */
 .item-box.selected {
-    border: 2px solid #00f;    /* Blue border indicates selection */
-    background-color: #555;    /* Slightly lighter background for visual cue */
+    border: 1px solid #00f;
+    background-color: #555;
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.5);
+}
+
+#visualization-button {
+    opacity: 0.7; /* or any value less than 1 */
+}
+#visualization-button:hover, 
+#visualization-button:focus, 
+#visualization-button.active {
+    opacity: 1;
 }
 
 /* Close button (styled to be visible on dark background) */
@@ -126,7 +154,8 @@ body {
     width: 1rem;
     height: 1rem;
     opacity: 0.8;              /* Slight transparency */
-    margin-left: auto;          /* Push it to the right */
+    margin-left: auto;
+    cursor: pointer;
 }
 
 /* Hover effect for close button */
@@ -153,32 +182,33 @@ button.active {
 #viewer-area {
     display: flex;
     width: 100%; /* Make sure it takes up full width */
-    height: calc(100% - 40px); /* Adjust for top bar */
+    height: calc(100% - 75px); /* Adjust for top bar */
+    padding-top: 5px;
+    padding-bottom: 5px;
+    background-color: transparent;
 }
 
 #viewerContainer {
     background-color: #ccc;
     flex-grow: 1;  /* Take up the available space */
     margin-right: 0; /* Ensure no right margin causing extra space */
+    background-color: transparent;
 }
 
 #model-info-panel label {
-    font-size: 0.85em;
-    color: #ddd;
+    font-size: 0.8em;
 }
 
 #model-info-panel input {
-    background-color: #444;
-    color: white;
     border: 1px solid #666;
 }
 
 /* Info panel shown */
 #model-info-panel {
     width: 150px; /* Adjust the panel width as needed */
-    background: #222;
-    color: white;
-    padding: 10px;
+    background: rgba(20, 20, 20, 0.7);
+    padding: 5px;
+    border-radius: 5px;
     overflow-y: auto;
     height: 100%; /* Ensure the info panel takes full height */
     margin: 0; /* Make sure no extra margin is causing spacing issues */
